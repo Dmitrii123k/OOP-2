@@ -1,5 +1,6 @@
 #include <QtWidgets>
 #include <math.h>
+#include <QtMath>
 #include "button.h"
 #include "calculator.h"
 
@@ -42,10 +43,15 @@ Calculator::Calculator(QWidget *parent) : QDialog(parent) {
  minusButton = createButton(tr("-"), operatorColor, SLOT(additiveOperatorClicked()));
  plusButton = createButton(tr("+"), operatorColor, SLOT(additiveOperatorClicked()));
  squareRootButton = createButton(tr("Sqrt"), operatorColor, SLOT(unaryOperatorClicked()));
- powerButton = createButton(tr("%"), operatorColor, SLOT(unaryOperatorClicked()));
+ powerButton = createButton(tr("x^2"), operatorColor, SLOT(unaryOperatorClicked()));
  reciprocalButton = createButton(tr("1/x"), operatorColor, SLOT(unaryOperatorClicked()));
  equalButton = createButton(tr("="), operatorColor.light(120), SLOT(equalClicked()));
- FButton = createButton(tr("F"), operatorColor.light(150), SLOT(FClicked()));
+ sinButton = createButton(tr("sin"), operatorColor, SLOT(unaryOperatorClicked()));
+ cosButton = createButton(tr("cos"), operatorColor, SLOT(unaryOperatorClicked()));
+ tanButton = createButton(tr("tan"), operatorColor, SLOT(unaryOperatorClicked()));
+ logButton = createButton(tr("ln"), operatorColor, SLOT(unaryOperatorClicked()));
+ expButton = createButton(tr("exp"), operatorColor, SLOT(unaryOperatorClicked()));
+ powButton = createButton(tr("x^y"), operatorColor, SLOT(multiplicativeOperatorClicked()));
 
  QGridLayout *mainLayout = new QGridLayout;
  mainLayout->setSizeConstraint(QLayout::SetFixedSize);
@@ -79,6 +85,12 @@ Calculator::Calculator(QWidget *parent) : QDialog(parent) {
  mainLayout->addWidget(powerButton, 3, 5);
  mainLayout->addWidget(reciprocalButton, 4, 5);
  mainLayout->addWidget(equalButton, 5, 5);
+ mainLayout->addWidget(sinButton, 2, 7);
+ mainLayout->addWidget(cosButton, 3, 7);
+ mainLayout->addWidget(tanButton, 4, 7);
+ mainLayout->addWidget(logButton, 5, 7);
+ mainLayout->addWidget(expButton, 1, 7);
+ mainLayout->addWidget(powButton, 0, 7);
  setLayout(mainLayout);
 
  setWindowTitle(tr("Calculator"));
@@ -121,6 +133,7 @@ void Calculator::unaryOperatorClicked() {
  Button *clickedButton = qobject_cast<Button *>(sender());
  QString clickedOperator = clickedButton->text();
  double operand = display->text().toDouble();
+
  double result = 0.0;
 
  if (clickedOperator == tr("Sqrt")) {
@@ -130,7 +143,7 @@ void Calculator::unaryOperatorClicked() {
   }
   result = sqrt(operand);
  }
- else if (clickedOperator == tr("%")) {
+ else if (clickedOperator == tr("x^2")) {
   result = pow(operand, 2.0);
  }
  else if (clickedOperator == tr("1/x")) {
@@ -140,6 +153,37 @@ void Calculator::unaryOperatorClicked() {
   }
   result = 1.0 / operand;
  }
+ else if (clickedOperator ==( "sin"))
+{
+
+
+    result = qSin(operand);
+}
+
+else if (clickedOperator ==( "cos"))
+{
+    result = qCos(operand);
+}
+else if (clickedOperator ==( "tan"))
+{ /*if (operand == 0.0) {
+         abortOperation();
+         return;}*/
+    result = qTan(operand);
+}
+else if (clickedOperator ==( "ln"))
+{
+  if (operand == 0.0) {
+             abortOperation();
+             return;
+
+    result = log(operand);
+}
+     }
+ else if (clickedOperator ==( "exp"))
+ {
+     result = qExp(operand);
+ }
+
  display->setText(QString::number(result));
  waitingForOperand = true;
 }
@@ -223,6 +267,8 @@ void Calculator::equalClicked() {
  waitingForOperand = true;
 }
 
+
+
 void Calculator::pointClicked() {
  if (waitingForOperand) display->setText("0");
  if (!display->text().contains(".")) display->setText(display->text() + tr("."));
@@ -291,16 +337,25 @@ Button *Calculator::createButton(const QString &text, const QColor &color, const
 
 void Calculator::abortOperation() {
  clearAll();
- display->setText(tr("####"));
+ display->setText(tr("ERROR"));
 }
 
 bool Calculator::calculate(double rightOperand, const QString &pendingOperator) {
  if (pendingOperator == tr("+")) sumSoFar += rightOperand;
  else if (pendingOperator == tr("-")) sumSoFar -= rightOperand;
  else if (pendingOperator == tr("*")) factorSoFar *= rightOperand;
- else if (pendingOperator == tr("/")) {
+  if (pendingOperator == tr("/")) {
   if (rightOperand == 0.0) return false;
   factorSoFar /= rightOperand;
  }
+ else if (pendingOperator == tr("x^y")) {
+
+     factorSoFar = qExp(rightOperand * log(factorSoFar));
+
+ }
  return true;
 }
+
+
+
+
